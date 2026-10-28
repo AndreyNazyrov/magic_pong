@@ -1,6 +1,7 @@
 extends Control
 
 func _ready():
+	SaveManager.load_game()
 	$PlayBtn.pressed.connect(_on_play_pressed)
 	$ExitBtn.pressed.connect(_on_exit_pressed)
 

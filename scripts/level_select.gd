@@ -2,6 +2,7 @@ extends Control
 
 func _ready():
 	$BackBtn.pressed.connect(_on_back_pressed)
+	SaveManager.load_game()
 	create_level_buttons()
 
 func create_level_buttons():
@@ -25,7 +26,7 @@ func create_level_buttons():
 		grid.add_child(btn)
 
 func _on_level_pressed(level: int):
-	# Переходим в игру (в будущем будем передавать номер уровня)
+	SaveManager.current_level = level
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
 
 func _on_back_pressed():

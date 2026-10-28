@@ -4,6 +4,7 @@ const SAVE_PATH = "user://save.dat"
 
 var coins: int = 0
 var unlocked_levels: int = 1 # Открыт только 1-й уровень
+var current_level: int = 1
 
 func save_game():
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)

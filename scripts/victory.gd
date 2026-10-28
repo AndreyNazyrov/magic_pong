@@ -10,4 +10,5 @@ func show_victory():
 func _on_continue_pressed():
 	get_tree().paused = false
 	visible = false
-	get_tree().reload_current_scene() # Перезапуск текущего уровня
+	# Возвращаемся в меню выбора уровней
+	get_tree().change_scene_to_file("res://scenes/level_select.tscn")

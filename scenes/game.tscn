@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://e3vq65xe3gqu" path="res://scenes/paddle.tscn" id="2_lnu2h"]
 [ext_resource type="PackedScene" uid="uid://b4v0na42wmnmq" path="res://scenes/game_over.tscn" id="4_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://c6ae4vfjgnl2d" path="res://scenes/victory.tscn" id="5_iywne"]
+[ext_resource type="PackedScene" uid="uid://bibxcgweo1xkh" path="res://scenes/hint_screen.tscn" id="6_p57ef"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_elpnf"]
 size = Vector2(20, 1280)
@@ -96,6 +97,16 @@ theme_override_font_sizes/font_size = 40
 text = "₽: 0"
 horizontal_alignment = 1
 
+[node name="MenuButton" type="Button" parent="HUDLayer" unique_id=56907917]
+offset_left = 11.0
+offset_top = 33.0
+offset_right = 59.0
+offset_bottom = 81.0
+theme_override_font_sizes/font_size = 29
+text = "⚙"
+
 [node name="GameOver" parent="." unique_id=1671615892 instance=ExtResource("4_lbhrr")]
 
 [node name="Victory" parent="." unique_id=2103984990 instance=ExtResource("5_iywne")]
+
+[node name="HintScreen" parent="." unique_id=864867517 instance=ExtResource("6_p57ef")]
