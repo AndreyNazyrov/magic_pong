@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cmsh7e5qlwa73"]
+
+[ext_resource type="Script" uid="uid://cthpigbsl1j8s" path="res://scripts/ball.gd" id="1_cxlvu"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_v25s2"]
+radius = 15.0
+
+[node name="Ball" type="CharacterBody2D" unique_id=2112444698]
+script = ExtResource("1_cxlvu")
+
+[node name="Visual" type="Polygon2D" parent="." unique_id=1964912606]
+polygon = PackedVector2Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1093721942]
+shape = SubResource("CircleShape2D_v25s2")

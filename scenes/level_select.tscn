@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://d2vtyx38bc6vm"]
+
+[ext_resource type="Script" uid="uid://b4dusx28qam8m" path="res://scripts/level_select.gd" id="1_3shnc"]
+
+[node name="LevelSelect" type="Control" unique_id=1785875838]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_3shnc")
+
+[node name="Bg" type="ColorRect" parent="." unique_id=73894811]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.101960786, 0.039215688, 0.18039216, 1)
+
+[node name="Title" type="Label" parent="." unique_id=851571696]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 50.0
+offset_bottom = 73.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 40
+text = "ВЫБОР УРОВНЯ"
+horizontal_alignment = 1
+
+[node name="BackBtn" type="Button" parent="." unique_id=1196614050]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 140.0
+offset_bottom = 80.0
+theme_override_font_sizes/font_size = 33
+text = "НАЗАД"
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1687743319]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GridContainer" type="GridContainer" parent="CenterContainer" unique_id=1584590362]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 20
+columns = 5

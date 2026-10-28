@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://b4v0na42wmnmq"]
+
+[ext_resource type="Script" uid="uid://bu6q8qsaast1n" path="res://scripts/game_over.gd" id="1_xeevv"]
+
+[node name="GameOver" type="CanvasLayer" unique_id=1671615892]
+process_mode = 2
+script = ExtResource("1_xeevv")
+
+[node name="Dim" type="ColorRect" parent="." unique_id=1909535478]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7058824)
+
+[node name="TitleLabel" type="Label" parent="." unique_id=1706063104]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 200.0
+offset_bottom = 300.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.26666668, 0.26666668, 1)
+theme_override_font_sizes/font_size = 60
+text = "ИГРА ОКОНЧЕНА"
+horizontal_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="." unique_id=237061155]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 500.0
+offset_bottom = 600.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.9607843, 0.77254903, 0.25882354, 1)
+theme_override_font_sizes/font_size = 50
+text = "Очки: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RestartButton" type="Button" parent="." unique_id=605502319]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 210.0
+offset_top = 900.0
+offset_right = -210.0
+offset_bottom = 1000.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 32
+text = "ИГРАТЬ СНОВА"
