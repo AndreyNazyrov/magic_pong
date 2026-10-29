@@ -5,6 +5,7 @@ var score: int = 0
 var total_blocks: int = 0
 var goal_type: String = "destroy_all" 
 var level_config: Dictionary = {}
+var target_blocks_left: int = 0
 
 @onready var death_zone = $DeathZone
 @onready var ball = $Ball
@@ -20,15 +21,23 @@ var explosive_scene = preload("res://scenes/explosive_block.tscn")
 var bonus_scene = preload("res://scenes/bonus.tscn")
 var ball_scene_instance = preload("res://scenes/ball.tscn")
 var level_data_script = preload("res://scripts/level_data.gd")
+var target_block_scene = preload("res://scenes/target_block.tscn")
 
 func _ready():
 	randomize()
 	SaveManager.load_game()
 	$HUDLayer/MenuButton.pressed.connect(_on_menu_button_pressed)
 	
+	
 	# Загружаем конфиг уровня
 	var ld = level_data_script.new()
 	level_config = ld.levels.get(SaveManager.current_level, {"goal": "destroy_all", "blocks": "default"})
+	
+	# === ГЕНЕРАЦИЯ БЛОКОВ, ЕСЛИ НУЖНО ===
+	if level_config.get("use_generator", false):
+		level_config["blocks"] = ld.generate_grid_blocks()
+	# ===================================
+	
 	goal_type = level_config.get("goal", "destroy_all")
 	
 	death_zone.body_entered.connect(_on_death_zone_body_entered)
@@ -45,67 +54,78 @@ func spawn_blocks():
 	if level_config.has("blocks") and level_config["blocks"] is Array:
 		for b in level_config["blocks"]:
 			var block
-			if b["type"] == "big": block = big_block_scene.instantiate()
-			elif b["type"] == "explosive": 
+			var b_type = b.get("type", "")
+			var is_target = b.get("is_target", false) or b_type == "target"
+			
+			# 1. Выбираем сцену в зависимости от типа
+			if b_type == "explosive":
 				block = explosive_scene.instantiate()
 				block.explode.connect(_on_explosive_block_exploded)
-			elif b["type"] == "strong":
+			elif b_type == "target" or is_target:
+				block = target_block_scene.instantiate()
+			else:
 				block = block_scene.instantiate()
-				block.is_strong = true
-				block.hp = 2
-				block.points = 20
-			else: block = block_scene.instantiate()
-				
+			
+			# 2. Применяем свойства (размер, hp, цвет)
+			apply_block_properties(block, b)
 			block.position = b["pos"]
 			add_child(block)
-			block.destroyed.connect(_on_block_destroyed.bind(block.points, block.global_position))
+			
 			total_blocks += 1
-	else:
-		# Стандартная сетка
-		var cols = 12
-		var rows = 6
-		var block_width = 40
-		var block_height = 20
-		var gap_x = 18
-		var gap_y = 8
-		var total_width = cols * block_width + (cols - 1) * gap_x
-		var start_x = (720 - total_width) / 2 + block_width / 2
-		var start_y = 150
-		var row_height = block_height + gap_y
-		
-		for row in range(rows):
-			for col in range(cols):
-				var roll = randf()
-				var block
-				if roll < 0.10:
-					block = explosive_scene.instantiate()
-					block.explode.connect(_on_explosive_block_exploded)
-				elif roll < 0.25:
-					block = block_scene.instantiate()
-					block.is_strong = true
-					block.hp = 2
-					block.points = 20
-				else:
-					block = block_scene.instantiate()
+			
+			# 3. Считаем цели
+			if is_target:
+				target_blocks_left += 1
 				
-				block.position = Vector2(start_x + col * (block_width + gap_x), start_y + row * row_height)
-				add_child(block)
-				block.destroyed.connect(_on_block_destroyed.bind(block.points, block.global_position))
-				total_blocks += 1
-
-func _on_block_destroyed(points: int, pos: Vector2):
+			# 4. Подключаем сигнал
+			# Для взрывных сигнал уже подключен выше (explode). 
+			# Для остальных подключаем destroyed.
+			if b_type != "explosive":
+				block.destroyed.connect(_on_block_destroyed.bind(block.points, block.global_position, is_target))
+				
+func apply_block_properties(block, data: Dictionary):
+	# 1. Размер (Size)
+	if data.has("size"):
+		var s = data["size"]
+		block.scale = Vector2(s.x / 40.0, s.y / 20.0) # 40x20 — базовый размер
+		
+	# 2. Прочность (HP)
+	if data.has("hp"):
+		block.hp = data["hp"]
+		block.is_strong = data["hp"] > 1 # Если hp > 1, значит он "крепкий" (меняет цвет)
+		
+	# 3. Очки (Points)
+	if data.has("points"):
+		block.points = data["points"]
+		
+	# 4. Цвет (Color)
+	if data.has("color"):
+		if block.has_node("Visual"):
+				block.get_node("Visual").color = Color(data["color"])
+		
+func _on_block_destroyed(points: int, pos: Vector2, is_target: bool = false):
 	add_score(points)
 	total_blocks -= 1
 	
 	# 1. Случайный шанс из конфига
 	var chance = level_config.get("bonus_chance", 0.0)
-	if chance > 0 and randf() < chance:
-		spawn_bonus(pos)
+	var allowed_bonuses = level_config.get("bonuses", [])
+	if chance > 0 and allowed_bonuses.size() > 0 and randf() < chance:
+		spawn_specific_bonus(pos, allowed_bonuses[randi() % allowed_bonuses.size()])
 		
-	# 2. Гарантированный бонус (при последнем блоке)
-	if total_blocks == 0 and level_config.has("guaranteed_bonus"):
-		spawn_specific_bonus(pos, level_config["guaranteed_bonus"])
-		
+	# 2. Гарантированный бонус
+	if level_config.has("guaranteed_bonus") and level_config.has("guaranteed_at"):
+		if total_blocks == level_config["guaranteed_at"]:
+			spawn_specific_bonus(pos, level_config["guaranteed_bonus"])
+	
+	# 3. Проверка цели "уничтожить только цели"
+	if goal_type == "destroy_target" and is_target:
+		target_blocks_left -= 1
+		if target_blocks_left <= 0:
+			win_level()
+			return # Выходим, чтобы не сработала проверка "destroy_all" ниже
+			
+	# 4. Проверка цели "уничтожить всё"
 	check_goal_progress()
 
 func spawn_bonus(pos: Vector2):
@@ -247,16 +267,17 @@ func update_ui():
 	lives_label.text = "❤️ " + str(lives)
 	coins_label.text = "₽: " + str(SaveManager.coins)
 
-func _on_explosive_block_exploded(explosion_pos: Vector2):
-	var radius = 80.0
+func _on_explosive_block_exploded(explosion_pos: Vector2, radius: float):
 	var targets = []
 	for child in get_children():
 		if child is StaticBody2D and child.has_method("hit") and is_instance_valid(child) and not child.is_queued_for_deletion():
 			if child.global_position.distance_to(explosion_pos) <= radius:
 				targets.append(child)
+	
 	for target in targets:
 		if is_instance_valid(target) and not target.is_queued_for_deletion():
 			target.hit()
+			
 	if is_instance_valid(ball) and ball.has_method("accelerate"):
 		ball.accelerate(3.0)
 

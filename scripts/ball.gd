@@ -87,6 +87,7 @@ func _physics_process(delta):
 		velocity = velocity.bounce(collision.get_normal())
 		current_speed += speed_increase
 		velocity = velocity.normalized() * current_speed
+		velocity = clamp_angle(velocity)
 		stuck_timer += delta
 		if stuck_timer > 1.5:
 			stuck_timer = 0.0
@@ -114,3 +115,17 @@ func reset_acceleration():
 		is_accelerated = false
 		current_speed /= 3.0
 		velocity = velocity.normalized() * current_speed
+		
+func clamp_angle(vel: Vector2) -> Vector2:
+	var min_angle = deg_to_rad(35.0) # Минимальный угол от горизонтали (35 градусов)
+	var speed = vel.length()
+	var angle = wrapf(vel.angle(), -PI, PI)
+	var abs_angle = abs(angle)
+	
+	# Если мяч летит слишком горизонтально (близко к 0 или PI)
+	if abs_angle < min_angle:
+		angle = min_angle * sign(angle if angle != 0 else 1)
+	elif abs_angle > PI - min_angle:
+		angle = (PI - min_angle) * sign(angle)
+		
+	return Vector2(cos(angle), sin(angle)) * speed		
